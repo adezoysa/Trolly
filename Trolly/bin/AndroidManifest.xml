@@ -3,15 +3,26 @@
       package="caldwell.ben.trolly"
       android:versionCode="6"
       android:versionName="1.4">
-	<uses-sdk android:minSdkVersion="3" />
+      <!-- 
+		Edited by: Achini De Zoysa
+		Edits: Change the minSDKVersion = 14 and added targetSdkVersion
+		 -->
+      
+	<uses-sdk android:minSdkVersion="14"  android:targetSdkVersion="19"/>
     <application android:icon="@drawable/icon" android:label="@string/app_name">
     	<provider android:name=".TrollyProvider"
             android:authorities="caldwell.ben.provider.Trolly"
         />
         <activity android:name=".Trolly"
-        		android:icon="@drawable/icon_48"
+        		android:icon="@drawable/icon"
                 android:label="@string/app_name"
-                android:screenOrientation="portrait">
+                
+                >
+                <!-- 
+                Edited by: Achini De Zoysa
+				Edits:Commented out the orientation
+				
+                android:screenOrientation="portrait" -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -23,7 +34,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".TrollyPreferences"
-        		android:label="@string/app_name" >
+        		android:label="@string/app_name"
+        		 >
         </activity>
     </application>
 </manifest> 

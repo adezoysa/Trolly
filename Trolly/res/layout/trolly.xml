@@ -8,15 +8,21 @@
 		<Button android:id="@+id/btn_add"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceLarge"
 			android:layout_alignParentRight="true"
 			android:text="@string/add" />
+		<!-- 
+		Edited by: Achini De Zoysa
+		Edits: Change the textappearace to large and the height of the text box to 47dp
+		 -->
 		<AutoCompleteTextView android:id="@+id/textbox"
 			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
+			android:layout_height="47dp"
 			android:layout_gravity="center_vertical"
 			android:layout_toLeftOf="@id/btn_add"
 			android:inputType="textCapWords"
 			android:imeOptions="actionDone"
+			android:textAppearance="?android:attr/textAppearanceLarge"
 			android:hint="@string/add_hint" />
 	</RelativeLayout>
 	<ListView android:id="@android:id/list"

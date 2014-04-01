@@ -47,7 +47,12 @@ public class TrollyProvider extends ContentProvider {
     private static final String TAG = "TrollyProvider";
 
     private static final String DATABASE_NAME = "trolly.db";
-    private static final int DATABASE_VERSION = 2;
+    
+    /**
+     * Changed by: Achini De Zoysa
+     * Changes: DATABASE_VERSION = 4 to update the table with new columns
+     */
+    private static final int DATABASE_VERSION = 4;
     private static final String TABLE_NAME = "shopping_list";
 
     private static HashMap<String, String> sProjectionMap;
@@ -65,16 +70,26 @@ public class TrollyProvider extends ContentProvider {
         DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
-
+        
+        /**
+         * Changed by: Achini De Zoysa
+         * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
+         */
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE " + TABLE_NAME + " ("
                     + ShoppingList._ID + " INTEGER PRIMARY KEY,"
                     + ShoppingList.ITEM + " TEXT,"
+                    + ShoppingList.QUANTITY + " TEXT,"
+                    + ShoppingList.UNITS + " TEXT,"
+                    + ShoppingList.PRICE + " INTEGER,"
+                    + ShoppingList.PRIORITY + " INTEGER,"
+                    + ShoppingList.TOTALPRICE + " INTEGER,"
                     + ShoppingList.STATUS + " INTEGER,"
                     + ShoppingList.CREATED_DATE + " INTEGER,"
                     + ShoppingList.MODIFIED_DATE + " INTEGER"
                     + ");");
+            
         }
 
         @Override
@@ -110,6 +125,7 @@ public class TrollyProvider extends ContentProvider {
             qb.setProjectionMap(sProjectionMap);
             qb.appendWhere(ShoppingList._ID + "=" + uri.getPathSegments().get(1));
             break;
+          
 
         default:
             throw new IllegalArgumentException("Unknown URI " + uri);
@@ -256,10 +272,20 @@ public class TrollyProvider extends ContentProvider {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(Trolly.AUTHORITY, "shoppinglist", ITEMS);
         sUriMatcher.addURI(Trolly.AUTHORITY, "shoppinglist/#", ITEM_ID);
-
+        
+        /**
+         * Changed by: Achini De Zoysa
+         * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
+         */
+        
         sProjectionMap = new HashMap<String, String>();
         sProjectionMap.put(ShoppingList._ID, ShoppingList._ID);
         sProjectionMap.put(ShoppingList.ITEM, ShoppingList.ITEM);
+        sProjectionMap.put(ShoppingList.QUANTITY, ShoppingList.QUANTITY);
+        sProjectionMap.put(ShoppingList.UNITS, ShoppingList.UNITS);
+        sProjectionMap.put(ShoppingList.PRICE, ShoppingList.PRICE);
+        sProjectionMap.put(ShoppingList.TOTALPRICE, ShoppingList.TOTALPRICE);
+        sProjectionMap.put(ShoppingList.PRIORITY, ShoppingList.PRIORITY);
         sProjectionMap.put(ShoppingList.STATUS, ShoppingList.STATUS);
         sProjectionMap.put(ShoppingList.CREATED_DATE, ShoppingList.CREATED_DATE);
         sProjectionMap.put(ShoppingList.MODIFIED_DATE, ShoppingList.MODIFIED_DATE);

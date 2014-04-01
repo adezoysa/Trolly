@@ -14,11 +14,87 @@
      limitations under the License.
 -->
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/item"
-    android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:gravity="center_vertical"
-    android:paddingLeft="5dip"
-/>
+<!-- 
+Edited by: Achini De Zoysa
+Edits: Design the whole layout
+ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="?android:attr/listPreferredItemHeight">
+	
+	
+
+<RelativeLayout 
+		      android:id="@+id/description"
+              android:layout_width="0dip"
+              android:layout_weight="1"
+              android:layout_height="?android:attr/listPreferredItemHeight"
+              android:paddingRight="20dip"
+    		  >
+             
+    <TextView android:id="@+id/priority"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:paddingLeft="20dip"
+			  android:paddingRight="10dip"    	
+              android:layout_marginTop="18dip"
+              android:layout_marginRight="2dip"
+			  android:layout_marginLeft="2dip"
+              android:gravity="center_vertical"
+              android:visibility="visible"/>     
+              
+	<TextView android:id="@+id/quantity"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:layout_width="wrap_content"
+			android:layout_height="?android:attr/listPreferredItemHeight"
+			android:layout_marginTop="8dip"
+        	android:layout_toRightOf="@id/priority"
+        	android:layout_alignParentTop="true"
+        	android:layout_alignWithParentIfMissing="true"
+		    android:visibility="visible"
+		    android:textStyle="normal"
+            android:gravity="center_vertical"              
+            android:text="1" />  
+            
+	<TextView android:id="@+id/units"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:layout_width="wrap_content"
+			android:layout_height="?android:attr/listPreferredItemHeight"
+			android:layout_marginTop="8dip"
+			android:layout_marginLeft="8dip"
+        	android:layout_toRightOf="@id/quantity"
+        	android:layout_alignParentTop="true"
+        	android:layout_alignWithParentIfMissing="true"
+		    android:visibility="visible"
+		    android:textStyle="normal"		
+            android:gravity="center_vertical" />              
+      
+   <TextView android:id="@+id/item"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:layout_width="wrap_content"
+			android:layout_height="?android:attr/listPreferredItemHeight"
+        	android:layout_toRightOf="@id/units"
+        	android:layout_alignParentTop="true"
+        	android:layout_alignWithParentIfMissing="true"
+        	android:layout_marginLeft="8dip"
+            android:layout_marginTop="8dip"
+			android:gravity="center_vertical"
+			android:textStyle="normal"
+			android:bufferType="spannable"
+			 />
+			
+	    <TextView android:id="@+id/price"
+	          android:textAppearance="?android:attr/textAppearanceMedium"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_alignParentTop="true"
+              android:layout_alignParentBottom="true"
+              android:layout_alignParentRight="true"
+              android:layout_marginTop="10dip"
+			  android:layout_marginLeft="10dip"
+              android:gravity="center_vertical"
+              android:visibility="visible"/> 
+
+</RelativeLayout>
+</LinearLayout>

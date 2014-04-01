@@ -57,7 +57,39 @@ public final class Trolly {
          * The shopping list item
          * <P>Type: TEXT</P>
          */
+       
         public static final String ITEM = "item";
+        
+        /**
+         * Added by: Achini De Zoysa
+         * The shopping list QUANTITY
+         * <P>Type: TEXT</P>
+         */
+        public static final String QUANTITY = "quantity";
+        /**
+         * Added by: Achini De Zoysa
+         * The shopping list QUANTITY, UNITS, PRICE, PRIORITY
+         * <P>Type: TEXT</P>
+         */
+        public static final String UNITS = "units";
+        /**
+         * Added by: Achini De Zoysa
+         * The shopping list PRICE
+         * <P>Type: TEXT</P>
+         */
+        public static final String PRICE = "price";
+        /**
+         * Added by: Achini De Zoysa
+         * The shopping list TOTALPRICE
+         * <P>Type: TEXT</P>
+         */
+        public static final String TOTALPRICE = "totalprice";
+        /**
+         * Added by: Achini De Zoysa
+         * The shopping list PRIORITY
+         * <P>Type: TEXT</P>
+         */
+        public static final String PRIORITY = "priority";
         
         /**
          * An "off list" item

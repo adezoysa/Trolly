@@ -28,18 +28,39 @@ public final class R {
         public static final int activity_horizontal_margin=0x7f070000;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
-        public static final int icon=0x7f020001;
-        public static final int icon_48=0x7f020002;
-        public static final int list_mode=0x7f020003;
-        public static final int shop_mode=0x7f020004;
+        public static final int attach_image=0x7f020000;
+        public static final int blank_thumbnail=0x7f020001;
+        public static final int ic_launcher=0x7f020002;
+        public static final int icon=0x7f020003;
+        public static final int icon_48=0x7f020004;
+        public static final int list_mode=0x7f020005;
+        public static final int shop_mode=0x7f020006;
     }
     public static final class id {
-        public static final int btn_add=0x7f090003;
+        public static final int attachimage=0x7f09000d;
+        public static final int btn_add=0x7f090016;
+        public static final int description=0x7f090010;
         public static final int dialog_confirm_prompt=0x7f090000;
         public static final int edit=0x7f090001;
-        public static final int item=0x7f090002;
-        public static final int textbox=0x7f090004;
+        public static final int editprice=0x7f090008;
+        public static final int editpriority=0x7f09000b;
+        public static final int editquantity=0x7f090004;
+        public static final int editunits=0x7f090006;
+        public static final int item=0x7f090014;
+        public static final int labeleditimage=0x7f09000c;
+        public static final int labeleditprice=0x7f090007;
+        public static final int labeleditpriority=0x7f09000a;
+        public static final int labeleditquantity=0x7f090003;
+        public static final int labeleditthumbnail=0x7f09000e;
+        public static final int labeleditunits=0x7f090005;
+        public static final int price=0x7f090015;
+        public static final int priority=0x7f090011;
+        public static final int priority_and_image=0x7f090009;
+        public static final int quantity=0x7f090012;
+        public static final int quantity_and_price=0x7f090002;
+        public static final int textbox=0x7f090017;
+        public static final int thumbnail=0x7f09000f;
+        public static final int units=0x7f090013;
     }
     public static final class layout {
         public static final int dialog_confirm=0x7f030000;
@@ -52,23 +73,29 @@ public final class R {
         public static final int add_hint=0x7f080005;
         public static final int app_name=0x7f080000;
         public static final int checkout=0x7f080006;
-        public static final int clear_list=0x7f080011;
-        public static final int clear_prompt=0x7f080012;
+        public static final int clear_list=0x7f080017;
+        public static final int clear_prompt=0x7f080018;
         public static final int delete_item=0x7f080009;
         public static final int dialog_cancel=0x7f080008;
         public static final int dialog_ok=0x7f080007;
         public static final int edit_item=0x7f08000a;
         public static final int empty_list=0x7f080003;
+        public static final int image=0x7f080010;
         public static final int key_sort_list=0x7f08000e;
         public static final int key_sort_shop=0x7f08000f;
         public static final int listing_button=0x7f080002;
+        public static final int menu_item_stores=0x7f080015;
         public static final int move_in_trolley=0x7f08000d;
         public static final int move_off_list=0x7f08000c;
         public static final int move_on_list=0x7f08000b;
-        public static final int preferences=0x7f080010;
-        public static final int reset_list=0x7f080013;
-        public static final int reset_prompt=0x7f080014;
+        public static final int preferences=0x7f080016;
+        public static final int price=0x7f080012;
+        public static final int priority=0x7f080011;
+        public static final int quantity=0x7f080014;
+        public static final int reset_list=0x7f080019;
+        public static final int reset_prompt=0x7f08001a;
         public static final int shopping_button=0x7f080001;
+        public static final int units=0x7f080013;
     }
     public static final class xml {
         public static final int preferences=0x7f040000;

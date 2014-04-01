@@ -18,6 +18,11 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
+    
+    <!-- 
+	Edited by: Achini De Zoysa
+	Edits: Change the textappearace to large
+	 -->
 
     <TextView 
         android:layout_height="wrap_content"
@@ -26,6 +31,7 @@
         android:layout_marginRight="20dip"
         android:id="@+id/dialog_confirm_prompt"
         android:gravity="left"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
                
 </LinearLayout>

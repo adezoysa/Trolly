@@ -19,6 +19,7 @@
 
 package caldwell.ben.trolly;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import caldwell.ben.trolly.R;
@@ -40,6 +41,7 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -92,6 +94,7 @@ public class Trolly extends ListActivity {
                 buffer = new StringBuilder();
                 buffer.append("UPPER(");
                 buffer.append(ShoppingList.ITEM);
+                
                 buffer.append(") GLOB ?");
                 args = new String[] { "*" + constraint.toString().toUpperCase() + "*" };
             }
@@ -105,18 +108,58 @@ public class Trolly extends ListActivity {
 		public void bindView(View view, Context context, Cursor cursor) {
 			TextView item = (TextView)view.findViewById(R.id.item);
 			item.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.ITEM)));
+		
+			TextView quantity = (TextView)view.findViewById(R.id.quantity);
+			quantity.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.QUANTITY)));
+			
+			TextView units = (TextView)view.findViewById(R.id.units);
+			units.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.UNITS)));
+			
+			TextView price = (TextView)view.findViewById(R.id.price);
+			price.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.TOTALPRICE)));
+			
+			TextView priority = (TextView)view.findViewById(R.id.priority);
+			priority.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.PRIORITY)));
+			
 			switch(cursor.getInt(cursor.getColumnIndex(ShoppingList.STATUS))){
 			case ShoppingList.OFF_LIST:
 				item.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				quantity.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				units.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				price.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				priority.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				
 				item.setTextColor(Color.DKGRAY);
+				quantity.setTextColor(Color.DKGRAY);
+				units.setTextColor(Color.DKGRAY);
+				price.setTextColor(Color.DKGRAY);
+				priority.setTextColor(Color.DKGRAY);
 				break;
 			case ShoppingList.ON_LIST:
 				item.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				quantity.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				units.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				price.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				priority.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+				
 				item.setTextColor(Color.GREEN);
+				quantity.setTextColor(Color.WHITE);
+				units.setTextColor(Color.WHITE);
+				price.setTextColor(Color.WHITE);
+				priority.setTextColor(Color.GREEN);
 				break;
 			case ShoppingList.IN_TROLLEY:
 				item.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				quantity.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				units.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				price.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				priority.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+				
 				item.setTextColor(Color.GRAY);
+				quantity.setTextColor(Color.GRAY);
+				units.setTextColor(Color.GRAY);
+				price.setTextColor(Color.GRAY);
+				priority.setTextColor(Color.GRAY);
 				break;
 			}
 		}
@@ -187,11 +230,21 @@ public class Trolly extends ListActivity {
      * The columns we are interested in from the database
      */
     private static final String[] PROJECTION = new String[] {
-            ShoppingList._ID, // 0
-            ShoppingList.ITEM, // 1
-            ShoppingList.STATUS, // 2
+    	ShoppingList._ID, // 0
+        ShoppingList.ITEM, // 1
+        /* Added by: Achini De Zoysa
+         * projection for each new column
+         */
+        ShoppingList.QUANTITY,//NEW
+        ShoppingList.UNITS,//NEW
+        ShoppingList.PRICE,//NEW
+        ShoppingList.TOTALPRICE,//NEW
+        ShoppingList.PRIORITY,//NEW
+        ShoppingList.STATUS, // 2
     };
     
+    
+
     // Menu item ids
     public static final int MENU_ITEM_DELETE = Menu.FIRST;
     public static final int MENU_ITEM_INSERT = Menu.FIRST + 1;
@@ -214,6 +267,13 @@ public class Trolly extends ListActivity {
        
   //Use private members for dialog textview to prevent weird persistence problem
 	private EditText mDialogEdit;
+	/**Added By: Achini De Zoysa
+	 * mDialog for each new columns
+	**/
+	private EditText mDialogEditQUANTITY;
+	private EditText mDialogEditPRICE;
+	private EditText mDialogEditUNITS;
+	private EditText mDialogEditPRIORITY;
 	private TextView mDialogText;
 	private View mDialogView;
 
@@ -307,7 +367,11 @@ public class Trolly extends ListActivity {
 
         //set the list adapter
 		mAdapter = new TrollyAdapter(this, R.layout.shoppinglist_item, mCursor,
-		new String[] { ShoppingList.ITEM}, new int[] { R.id.item});
+	/**
+     * Changed by: Achini De Zoysa
+     * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
+     */
+		new String[] { ShoppingList.ITEM,ShoppingList.QUANTITY,ShoppingList.UNITS,ShoppingList.TOTALPRICE,ShoppingList.PRIORITY}, new int[] { R.id.item, R.id.quantity,R.id.units, R.id.price, R.id.priority});
 		setListAdapter(mAdapter);
 	}
 
@@ -405,7 +469,15 @@ public class Trolly extends ListActivity {
 	        case MENU_ITEM_EDIT:
 	        	//Show edit dialog
 	        	showDialog(DIALOG_EDIT);
+	        	/**
+	             * Changed by: Achini De Zoysa
+	             * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE to edit Dialog
+	             */
 	        	mDialogEdit.setText(c.getString(c.getColumnIndex(ShoppingList.ITEM)));
+	        	mDialogEditQUANTITY.setText(c.getString(c.getColumnIndex(ShoppingList.QUANTITY)));
+	        	mDialogEditUNITS.setText(c.getString(c.getColumnIndex(ShoppingList.UNITS)));
+	        	mDialogEditPRICE.setText(c.getString(c.getColumnIndex(ShoppingList.PRICE)));
+	        	mDialogEditPRIORITY.setText(c.getString(c.getColumnIndex(ShoppingList.PRIORITY)));
 	        	return true;
 	        case MENU_ITEM_DELETE:
 	        	//Show are you sure dialog then delete
@@ -497,18 +569,71 @@ public class Trolly extends ListActivity {
 	protected Dialog onCreateDialog(int id) {
 		LayoutInflater factory = LayoutInflater.from(this);
 		switch (id) {
+		/**
+         * Changed by: Achini De Zoysa
+         * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE to edit dialog
+         */
 		case DIALOG_EDIT:
             mDialogView = factory.inflate(R.layout.dialog_edit, null);
             mDialogEdit = (EditText)mDialogView.findViewById(R.id.edit);
+            mDialogEditQUANTITY = (EditText)mDialogView.findViewById(R.id.editquantity);
+            mDialogEditPRICE = (EditText)mDialogView.findViewById(R.id.editprice);
+            mDialogEditUNITS = (EditText)mDialogView.findViewById(R.id.editunits);
+            mDialogEditPRIORITY = (EditText)mDialogView.findViewById(R.id.editpriority);
             return new AlertDialog.Builder(this)
                 .setTitle(R.string.edit_item)
                 .setView(mDialogView)
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                	
                 	public void onClick(DialogInterface dialog, int whichButton) {
                     	/* User clicked OK so do some stuff */
+                		
+                		String text = mDialogEdit.getText().toString();
+            			String price = mDialogEditPRICE.getText().toString();
+                		String quantity = mDialogEditQUANTITY.getText().toString();
+                		String priority = mDialogEditPRIORITY.getText().toString();
+                		String units = mDialogEditUNITS.getText().toString();
+    
+                		text = text.trim();
                 		ContentValues values = new ContentValues();
-                        values.put(ShoppingList.ITEM, mDialogEdit.getText().toString());
-                		getContentResolver().update(mUri, values, null, null);
+                		
+                		values.put(ShoppingList.ITEM, text);
+                		
+                		// Calculate the total price according to the give quantity
+                		if (price != null) {
+                			values.put(ShoppingList.PRICE, price);
+                			
+                			try {
+                				double Dprice = Double.parseDouble(price);
+                				
+                				if (!TextUtils.isEmpty(quantity)) {
+                					double Dquantity = Double.parseDouble(quantity);
+                					Dprice = Dquantity * Dprice;
+                					NumberFormat nf = NumberFormat.getInstance(); // get instance
+                					nf.setMaximumFractionDigits(2); // set decimal places
+                					String totalprice = nf.format(Dprice);
+                					values.put(ShoppingList.TOTALPRICE, totalprice);
+                				
+                				}else{
+                					values.put(ShoppingList.TOTALPRICE,price);
+                				}
+                			} catch (NumberFormatException e) {
+                				// do nothing
+                			}
+                    		
+                			
+                		}
+                		if (units != null) {
+                			values.put(ShoppingList.UNITS, units);
+                		}
+                		if (quantity != null) {
+                			values.put(ShoppingList.QUANTITY, quantity);
+                		}
+                		if (priority != null) {
+                			values.put(ShoppingList.PRIORITY, priority);
+                		}
+                       
+                	getContentResolver().update(mUri, values, null, null);
                 	}
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
@@ -622,6 +747,7 @@ public class Trolly extends ListActivity {
     		c = getContentResolver().query(getIntent().getData(), 
     										PROJECTION, 
     										ShoppingList.ITEM + "='" + item + "'", 
+    										//ShoppingList.UNITS + "='" + item + "'", 
     										null, 
     										null);
 

@@ -20,6 +20,16 @@
     <string name="key_sort_list">list mode sort order</string>
     <string name="key_sort_shop">shop mode sort order</string>
     
+    <!-- Added By: Achini De Zoysa 
+    Changes: All the new Item categories: Images(s), Priority, Price, Units, Quantity -->
+    
+    <string name="image">Image(s)</string>
+    <string name="priority">Priority</string>
+    <string name="price">Price (per quantity)</string>
+    <string name="units">Units</string>
+    <string name="quantity">Quantity</string>
+    
+    <string name="menu_item_stores">Stores...</string>
     <string name="preferences">Preferences</string>
     <string name="clear_list">Clear List</string>
     <string name="clear_prompt">Remove all items from the list?</string>
