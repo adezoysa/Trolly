@@ -233,24 +233,6 @@ public class Trolly extends ListActivity {
 				listsarray.add(toAdd);
 				item.setText(toAdd);
 			}
-		
-			switch (cursor.getInt(cursor.getColumnIndex(ShoppingList.STATUS))) {
-			case ShoppingList.OFF_LIST:
-				item.setPaintFlags(item.getPaintFlags()
-						& ~Paint.STRIKE_THRU_TEXT_FLAG);
-				item.setTextColor(Color.DKGRAY);
-				break;
-			case ShoppingList.ON_LIST:
-				item.setPaintFlags(item.getPaintFlags()
-						& ~Paint.STRIKE_THRU_TEXT_FLAG);
-				item.setTextColor(Color.GREEN);
-				break;
-			case ShoppingList.IN_TROLLEY:
-				item.setPaintFlags(item.getPaintFlags()
-						| Paint.STRIKE_THRU_TEXT_FLAG);
-				item.setTextColor(Color.GRAY);
-				break;
-			}
 		}
 		
 		@Override
@@ -516,13 +498,13 @@ public class Trolly extends ListActivity {
         	addExtraItems();
     }
     
-	protected void updateList() {
+	protected void updateList() { //TODO
 		/*Added By: Hantao Zhao
 		 * Change the set up statement to include the list name
 		 */
         //set up the list cursor
-		mCursor = managedQuery(getIntent().getData(), PROJECTION, adding ? null
-				: ShoppingList.STATUS + "<>" + ShoppingList.OFF_LIST
+		mCursor = managedQuery(getIntent().getData(), PROJECTION, adding ? "listname='" + currentList
+				+ "'" + " AND item !=''": ShoppingList.STATUS + "<>" + ShoppingList.OFF_LIST
 						+ " AND listname='" + currentList + "'"
 						+ " AND item !=''", null,
 				ShoppingList.DEFAULT_SORT_ORDER);
