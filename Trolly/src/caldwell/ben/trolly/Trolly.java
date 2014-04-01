@@ -65,6 +65,10 @@ public class Trolly extends ListActivity {
 	
 	public static final String KEY_ITEM = "items";
 	public static boolean adding = false;
+	/* Added by: Hantao Zhao
+     * ---Add---
+     */
+	public static boolean listMode = false;
 	
 	/**
 	 * TrollyAdapter allows crossing items off the list and filtering
@@ -72,6 +76,13 @@ public class Trolly extends ListActivity {
 	 * @author Ben
 	 *
 	 */
+	
+	/* Added by: Hantao Zhao
+     * currentList
+     */
+	public String currentList = "Default List";
+	
+	
 	private static class TrollyAdapter extends SimpleCursorAdapter implements Filterable {
 
 		private ContentResolver mContent;   
@@ -172,6 +183,92 @@ public class Trolly extends ListActivity {
 	}
 	
 	/**
+	 * Added By: Hantao Zhao
+	 * Class: TrollyAdapterForList
+	 * Functionality: New Adapter for list performance
+	 */
+	
+	private static class TrollyAdapterForList extends SimpleCursorAdapter
+	implements Filterable {
+
+		private ContentResolver mContent;
+		
+		ArrayList<String> listsarray = new ArrayList<String>();
+		
+		public TrollyAdapterForList(Context context, int layout, Cursor c,
+				String[] from, int[] to) {
+			super(context, layout, c, from, to);
+			mContent = context.getContentResolver();
+		}
+		
+		@Override
+		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
+			if (getFilterQueryProvider() != null) {
+				return getFilterQueryProvider().runQuery(constraint);
+			}
+		
+			StringBuilder buffer = null;
+			String[] args = null;
+			if (constraint != null) {
+				buffer = new StringBuilder();
+				buffer.append("UPPER(");
+				buffer.append(ShoppingList.LISTNAME);
+				buffer.append(") GLOB ?");
+				args = new String[] { "*" + constraint.toString().toUpperCase()
+						+ "*" };
+			}
+		
+			return mContent.query(ShoppingList.CONTENT_URI, LISTPROJECTION,
+					buffer == null ? null : buffer.toString(), args, null);
+		}
+		
+		@Override
+		// bindView
+		public void bindView(View view, Context context, Cursor cursor) {
+			TextView item = (TextView) view.findViewById(R.id.item);
+			String toAdd = cursor.getString(cursor
+					.getColumnIndex(ShoppingList.LISTNAME));
+		
+			if (!listsarray.contains(toAdd)) {
+				listsarray.add(toAdd);
+				item.setText(toAdd);
+			}
+		
+			switch (cursor.getInt(cursor.getColumnIndex(ShoppingList.STATUS))) {
+			case ShoppingList.OFF_LIST:
+				item.setPaintFlags(item.getPaintFlags()
+						& ~Paint.STRIKE_THRU_TEXT_FLAG);
+				item.setTextColor(Color.DKGRAY);
+				break;
+			case ShoppingList.ON_LIST:
+				item.setPaintFlags(item.getPaintFlags()
+						& ~Paint.STRIKE_THRU_TEXT_FLAG);
+				item.setTextColor(Color.GREEN);
+				break;
+			case ShoppingList.IN_TROLLEY:
+				item.setPaintFlags(item.getPaintFlags()
+						| Paint.STRIKE_THRU_TEXT_FLAG);
+				item.setTextColor(Color.GRAY);
+				break;
+			}
+		}
+		
+		@Override
+		public CharSequence convertToString(Cursor cursor) {
+			String toAdd = cursor.getString(cursor
+					.getColumnIndex(ShoppingList.LISTNAME));
+			if (!listsarray.contains(toAdd)) {
+				return toAdd;
+			} else
+				return null;
+		}
+
+}
+	
+	
+	
+	
+	/**
 	 * AutoFillAdapter is an adapter for the AutoCompleteTextView at the top of the Trolly Activity
 	 * @author Ben Caldwel
 	 *
@@ -240,10 +337,20 @@ public class Trolly extends ListActivity {
         ShoppingList.PRICE,//NEW
         ShoppingList.TOTALPRICE,//NEW
         ShoppingList.PRIORITY,//NEW
+        /* Added by: Hantao Zhao
+         * projection for listname
+         */
+        ShoppingList.LISTNAME, 
         ShoppingList.STATUS, // 2
     };
     
-    
+    /* Added by: Hantao Zhao
+     * ListProjection
+     */
+    private static final String[] LISTPROJECTION = new String[] {
+		ShoppingList._ID, // 0
+		ShoppingList.STATUS, // 2
+		ShoppingList.LISTNAME, };
 
     // Menu item ids
     public static final int MENU_ITEM_DELETE = Menu.FIRST;
@@ -256,6 +363,12 @@ public class Trolly extends ListActivity {
     public static final int MENU_ITEM_EDIT = Menu.FIRST + 7;
     public static final int MENU_ITEM_CLEAR = Menu.FIRST + 8;
     public static final int MENU_ITEM_RESET = Menu.FIRST + 9;
+    
+    /* Added by: Hantao Zhao
+     * Add for the button of the list
+     */
+ 	public static final int MENU_LISTS = Menu.FIRST + 10;
+ 	public static final int MENU_SHOPPING = Menu.FIRST + 11;
     
     /**
      * Case selections for the type of dialog box displayed
@@ -281,6 +394,10 @@ public class Trolly extends ListActivity {
 	private AutoCompleteTextView mTextBox;
 	private Button btnAdd;
 	private TrollyAdapter mAdapter;
+	/* Added by: Hantao Zhao
+     * Adapter for the list
+     */
+	private TrollyAdapterForList mAdapterForList;
 	private SharedPreferences mPrefs;
 
 	private Uri mUri;
@@ -322,19 +439,31 @@ public class Trolly extends ListActivity {
         btnAdd.setOnClickListener(new Button.OnClickListener(){
 			@Override
 			public void onClick(View view) {
+			
+			/*Added by: Hantao Zhao
+			 * Listmode vs Shopping mode
+			 */
+			if (!listMode) {
 				//If there is a string in the textbox then add it to the list
-				if (mTextBox.getText().length()>0) {
-					Cursor c = getContentResolver().query(getIntent().getData(), 
-							PROJECTION, 
-							ShoppingList.ITEM+"='"+mTextBox.getText()+"'", 
-							null, 
-							null);
+				
+				if (mTextBox.getText().length() > 0) {
+					Cursor c = getContentResolver().query(
+							getIntent().getData(),
+							PROJECTION,
+							ShoppingList.ITEM + "='" + mTextBox.getText()
+									+ "'" + " AND listname='" + currentList
+									+ "'", 
+							null, null);
 					c.moveToFirst();
 					if (c == null 
 							|| c.isBeforeFirst() 
 							|| c.getInt(c.getColumnIndex(ShoppingList.STATUS))==ShoppingList.ON_LIST) {
 						ContentValues values = new ContentValues();
 						values.put(ShoppingList.ITEM, mTextBox.getText().toString());
+						/*Added by: Hantao Zhao
+						 * Replace the listname on Click
+						 */
+						values.put(ShoppingList.LISTNAME, currentList);
 						getContentResolver().insert(ShoppingList.CONTENT_URI,values);
 					} else {
 						ContentValues values = new ContentValues();
@@ -348,7 +477,37 @@ public class Trolly extends ListActivity {
 					adding = !adding;
 					updateList();
 				}
+				}
+			
+			/*Added By: Hantao Zhao
+			 * Else statement
+			 */
+			// List mode to add new list Name
+			else {
+				if (mTextBox.getText().length() > 0) {
+					Cursor c = getContentResolver().query(
+							getIntent().getData(),
+							PROJECTION,
+							ShoppingList.ITEM + "='" + mTextBox.getText()
+									+ "'" + " AND listname='" + currentList
+									+ "'", 	null, null);
+					c.moveToFirst();
+
+					ContentValues values = new ContentValues();
+					values.put(ShoppingList.ITEM, "");
+					values.put(ShoppingList.LISTNAME, mTextBox.getText()
+							.toString());
+					getContentResolver().insert(ShoppingList.CONTENT_URI, values);
+					updateListView();
+				} else {
+					adding = !adding;
+					updateListView();
+				}
+				mTextBox.setText("");
+
 			}
+		}
+
         });
         //mPrefs = getSharedPreferences(null, MODE_PRIVATE);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -358,15 +517,19 @@ public class Trolly extends ListActivity {
     }
     
 	protected void updateList() {
+		/*Added By: Hantao Zhao
+		 * Change the set up statement to include the list name
+		 */
         //set up the list cursor
-	        mCursor = managedQuery(getIntent().getData(), 
-				PROJECTION, 
-				adding ? null: ShoppingList.STATUS+"<>"+ShoppingList.OFF_LIST,
-				null,
+		mCursor = managedQuery(getIntent().getData(), PROJECTION, adding ? null
+				: ShoppingList.STATUS + "<>" + ShoppingList.OFF_LIST
+						+ " AND listname='" + currentList + "'"
+						+ " AND item !=''", null,
 				ShoppingList.DEFAULT_SORT_ORDER);
 
         //set the list adapter
 		mAdapter = new TrollyAdapter(this, R.layout.shoppinglist_item, mCursor,
+				
 	/**
      * Changed by: Achini De Zoysa
      * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
@@ -401,36 +564,63 @@ public class Trolly extends ListActivity {
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		//super.onListItemClick(l, v, position, id);
-		Uri uri = ContentUris.withAppendedId(getIntent().getData(), id);
-		Cursor c = getContentResolver().query(uri, PROJECTION, null, null, null);
-		c.moveToFirst();
-		ContentValues values = new ContentValues();
-		switch (c.getInt(c.getColumnIndex(ShoppingList.STATUS)))
-		{
-		case ShoppingList.OFF_LIST:
-			//move from off the list to on the list
-			values.put(ShoppingList.STATUS, ShoppingList.ON_LIST);
-			getContentResolver().update(uri, values, null, null);
-			break;
-		case ShoppingList.ON_LIST:
-			values.put(ShoppingList.STATUS, ShoppingList.IN_TROLLEY);
-			getContentResolver().update(uri, values, null, null);
-			break;
-		case ShoppingList.IN_TROLLEY:
-			//move back from in the trolley to on the list
-			values.put(ShoppingList.STATUS, ShoppingList.ON_LIST);
-			getContentResolver().update(uri, values, null, null);
-			break;
+		
+		//Added by : Hantao Zhao
+		if (!listMode) {
+			//super.onListItemClick(l, v, position, id);
+			Uri uri = ContentUris.withAppendedId(getIntent().getData(), id);
+			Cursor c = getContentResolver().query(uri, PROJECTION, null, null, null);
+			c.moveToFirst();
+			ContentValues values = new ContentValues();
+			switch (c.getInt(c.getColumnIndex(ShoppingList.STATUS)))
+			{
+			case ShoppingList.OFF_LIST:
+				//move from off the list to on the list
+				values.put(ShoppingList.STATUS, ShoppingList.ON_LIST);
+				getContentResolver().update(uri, values, null, null);
+				break;
+			case ShoppingList.ON_LIST:
+				values.put(ShoppingList.STATUS, ShoppingList.IN_TROLLEY);
+				getContentResolver().update(uri, values, null, null);
+				break;
+			case ShoppingList.IN_TROLLEY:
+				//move back from in the trolley to on the list
+				values.put(ShoppingList.STATUS, ShoppingList.ON_LIST);
+				getContentResolver().update(uri, values, null, null);
+				break;
+			}
+			if (adding) {
+				adding = false;				
+				updateList();
+			}
 		}
-		if (adding) {
-			adding = false;				
+
+		/*Added By: Hantao Zhao
+		 * Handle the click when the mode is list menu
+		 * */
+
+
+		else {
+			Uri uri = ContentUris.withAppendedId(getIntent().getData(), id);
+			Cursor c = getContentResolver().query(uri, PROJECTION, null, null,
+					null);
+			c.moveToFirst();
+
+			String list = c.getString(c.getColumnIndex(ShoppingList.LISTNAME));
+			currentList = list;
 			updateList();
+			mTextBox.setHint("Add an item");
+			listMode = false;
+
 		}		
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+		
+		if (!listMode) {
+			
+	
 		AdapterView.AdapterContextMenuInfo info;
         try {
              info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -484,13 +674,55 @@ public class Trolly extends ListActivity {
 	        	showDialog(DIALOG_DELETE);
 	        	mDialogText.setText(c.getString(c.getColumnIndex(ShoppingList.ITEM)));
 	        	return true;
+        	}
         }
+		/*Added By: Hantao Zhao
+		 * The list interface pop out window for handling delete
+		 * */
+     		else {
+     			AdapterView.AdapterContextMenuInfo info;
+     			try {
+     				info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+     			} catch (ClassCastException e) {
+     				return false;
+     			}
+
+     			Cursor cursor = (Cursor) getListAdapter().getItem(info.position);
+     			if (cursor == null) {
+     				// For some reason the requested item isn't available, do
+     				// nothing
+     				return false;
+     			}
+
+     			mUri = ContentUris.withAppendedId(getIntent().getData(),
+     					cursor.getLong(cursor.getColumnIndex(ShoppingList._ID)));
+     			Cursor c = getContentResolver().query(mUri, PROJECTION, null, null,
+     					null);
+     			c.moveToFirst();
+     			ContentValues values = new ContentValues();
+     			switch (item.getItemId()) {
+     			case MENU_ITEM_DELETE:
+     				showDialog(DIALOG_DELETE);
+     				currentList = c.getString(c
+     						.getColumnIndex(ShoppingList.LISTNAME));
+     				mDialogText.setText(c.getString(c
+     						.getColumnIndex(ShoppingList.LISTNAME)));
+
+     				break;
+     			}
+     			return true;
+     		}
         return false;
+        
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		
+		//Added By: Hantao
+		if (!listMode) {
+			
+	
 		AdapterView.AdapterContextMenuInfo info;
         try {
              info = (AdapterView.AdapterContextMenuInfo) menuInfo;
@@ -525,11 +757,40 @@ public class Trolly extends ListActivity {
         // Add context menu items that are relevant for all items
     	menu.add(0, MENU_ITEM_EDIT, 0, R.string.edit_item);
     	menu.add(0, MENU_ITEM_DELETE, 0, R.string.delete_item);
+		
+    	/*Added By: Hantao Zhao
+		 * Constructor for the Menu
+		 * */
+		} else {
+			AdapterView.AdapterContextMenuInfo info;
+			try {
+				info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+			} catch (ClassCastException e) {
+				return;
+			}
+			Cursor cursor = (Cursor) getListAdapter().getItem(info.position);
+			if (cursor == null) {
+				// For some reason the requested item isn't available, do
+				// nothing
+				return;
+			}
+			menu.setHeaderTitle(cursor.getString(cursor
+					.getColumnIndex(ShoppingList.LISTNAME)));
+			menu.add(0, MENU_ITEM_DELETE, 0, R.string.delete_item);
+		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
+		/*Added By: Hantao Zhao
+		 *list menu within the menu
+		 * */
+		menu.add(0, MENU_LISTS, 2, R.string.lists).setIcon(android.R.drawable.ic_menu_more); 
+		/*Added By: Hantao Zhao
+		 *list menu within the menu
+		 * */
+		menu.add(0, MENU_SHOPPING, 2, R.string.shopping).setIcon(android.R.drawable.ic_menu_edit); 
 		menu.add(0, MENU_ITEM_CHECKOUT, 2, R.string.checkout)
         .setIcon(android.R.drawable.ic_media_next);
 		menu.add(0, MENU_ITEM_CLEAR, 3, R.string.clear_list)
@@ -544,6 +805,20 @@ public class Trolly extends ListActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		/*Added By: Hantao Zhao
+		 *Add new button lists to change to lists interface
+		 * */
+		case MENU_LISTS:
+			listMode = true;
+			mTextBox.setHint("Add a list");
+			updateListView();
+			return true;
+		case MENU_SHOPPING:
+			mTextBox.setHint("Add an item");
+			updateList();
+			break;
+			
+		// case MENU_LISTS			
         case MENU_ITEM_CHECKOUT:
         	//Change all items from in trolley to off list
         	checkout();
@@ -645,21 +920,99 @@ public class Trolly extends ListActivity {
 		case DIALOG_DELETE:
             mDialogView = factory.inflate(R.layout.dialog_confirm, null);
             mDialogText = (TextView)mDialogView.findViewById(R.id.dialog_confirm_prompt);
-            return new AlertDialog.Builder(this)
-                .setTitle(R.string.delete_item)
-                .setView(mDialogView)
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                	public void onClick(DialogInterface dialog, int whichButton) {
-                    	/* User clicked OK so do some stuff */
-                		getContentResolver().delete(mUri, null, null);
-                	}
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        /* User clicked cancel so do some stuff */
-                    }
-                })
-                .create();
+            // Aded by: Hantao Zhao
+            if (!listMode) {
+	            return new AlertDialog.Builder(this)
+	                .setTitle(R.string.delete_item)
+	                .setView(mDialogView)
+	                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+	                	public void onClick(DialogInterface dialog, int whichButton) {
+	                    	/* User clicked OK so do some stuff */
+	                		getContentResolver().delete(mUri, null, null);
+	                	}
+	                })
+	                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+	                    public void onClick(DialogInterface dialog, int whichButton) {
+	                        /* User clicked cancel so do some stuff */
+	                    }
+                }).create();
+			}
+            /*Added By: Hantao Zhao
+    		 *Handle the list interface delete action
+    		 * */
+			else {
+
+				return new AlertDialog.Builder(this)
+						.setTitle(R.string.delete_item)
+						.setView(mDialogView)
+						.setPositiveButton(R.string.dialog_ok,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int whichButton) {
+										/* User clicked OK so do some stuff */
+										// delete all item from the currentList
+										Cursor c = managedQuery(
+												getIntent().getData(),
+												PROJECTION,
+												adding ? null
+														: ShoppingList.STATUS
+																+ "<>"
+																+ ShoppingList.OFF_LIST
+																+ " AND listname='"
+																+ currentList
+																+ "'", null,
+												ShoppingList.DEFAULT_SORT_ORDER);
+										c.moveToFirst();
+										ContentValues values = new ContentValues();
+										values.put(ShoppingList.STATUS,
+												ShoppingList.OFF_LIST);
+										Uri uri;
+										long id;
+										// loop through all items in the list
+										while (!c.isAfterLast()) {
+											id = c.getLong(c
+													.getColumnIndexOrThrow(ShoppingList._ID));
+											uri = ContentUris.withAppendedId(
+													getIntent().getData(), id);
+											// Update the status of this item
+											// (in trolley) to "off list"
+											getContentResolver().update(uri,
+													values, null, null);
+											// Cleanup the list by deleting
+											// double up items that have been
+											// checked out
+											getContentResolver()
+													.delete(getIntent()
+															.getData(),
+															ShoppingList.ITEM
+																	+ "='"
+																	+ c.getString(c
+																			.getColumnIndex(ShoppingList.ITEM))
+																	+ "' AND "
+																	+ ShoppingList._ID
+																	+ "<>"
+																	+ id
+																	+ " AND listname='"
+																	+ currentList
+																	+ "'", null);
+											c.moveToNext();
+										}
+										getContentResolver().delete(
+												getIntent().getData(),
+												"listname='" + currentList
+														+ "'", null);
+										mTextBox.setHint("Add an item");
+										updateListView();
+									}
+								})
+						.setNegativeButton(R.string.dialog_cancel,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int whichButton) {
+										/* User clicked cancel so do some stuff */
+									}
+								}).create();
+			}
 		case DIALOG_CLEAR:
             mDialogView = factory.inflate(R.layout.dialog_confirm, null);
             mDialogText = (TextView)mDialogView.findViewById(R.id.dialog_confirm_prompt);
@@ -777,12 +1130,28 @@ public class Trolly extends ListActivity {
     				 */
     				ContentValues values = new ContentValues();
         			values.put(ShoppingList.ITEM, item);
+        			values.put(ShoppingList.LISTNAME, currentList);
         			values.put(ShoppingList.STATUS, ShoppingList.ON_LIST);
         			getContentResolver().insert(getIntent().getData(), values);
     			}
     		}    		
     	}
     }
+    /*
+     * Added By: Hanto Zhao
+	 * Funcion to update the list views in the list mode interface
+	 */
+	public void updateListView() {
+		this.mCursor = managedQuery(getIntent().getData(), LISTPROJECTION,
+				" 0==0) GROUP BY ( " + ShoppingList.LISTNAME, null,
+				ShoppingList.LISTNAME + " ASC");
+
+		// set the list adapter
+		this.mAdapterForList = new TrollyAdapterForList(this,
+				R.layout.shoppinglist_item, mCursor,
+				new String[] { ShoppingList.LISTNAME }, new int[] { R.id.item });
+		setListAdapter(mAdapterForList);
+	}
 }
 
 

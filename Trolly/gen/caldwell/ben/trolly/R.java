@@ -73,27 +73,35 @@ public final class R {
         public static final int add_hint=0x7f080005;
         public static final int app_name=0x7f080000;
         public static final int checkout=0x7f080006;
-        public static final int clear_list=0x7f080017;
-        public static final int clear_prompt=0x7f080018;
+        public static final int clear_list=0x7f080019;
+        public static final int clear_prompt=0x7f08001a;
         public static final int delete_item=0x7f080009;
         public static final int dialog_cancel=0x7f080008;
         public static final int dialog_ok=0x7f080007;
         public static final int edit_item=0x7f08000a;
         public static final int empty_list=0x7f080003;
+        /**  Added By: Achini De Zoysa 
+    Changes: All the new Item categories: Images(s), Priority, Price, Units, Quantity 
+         */
         public static final int image=0x7f080010;
         public static final int key_sort_list=0x7f08000e;
         public static final int key_sort_shop=0x7f08000f;
         public static final int listing_button=0x7f080002;
+        /**  Added By: Hantao Zhao
+    Changes: ListItem, Shooping 
+         */
+        public static final int lists=0x7f080016;
         public static final int menu_item_stores=0x7f080015;
         public static final int move_in_trolley=0x7f08000d;
         public static final int move_off_list=0x7f08000c;
         public static final int move_on_list=0x7f08000b;
-        public static final int preferences=0x7f080016;
+        public static final int preferences=0x7f080018;
         public static final int price=0x7f080012;
         public static final int priority=0x7f080011;
         public static final int quantity=0x7f080014;
-        public static final int reset_list=0x7f080019;
-        public static final int reset_prompt=0x7f08001a;
+        public static final int reset_list=0x7f08001b;
+        public static final int reset_prompt=0x7f08001c;
+        public static final int shopping=0x7f080017;
         public static final int shopping_button=0x7f080001;
         public static final int units=0x7f080013;
     }

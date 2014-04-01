@@ -49,10 +49,10 @@ public class TrollyProvider extends ContentProvider {
     private static final String DATABASE_NAME = "trolly.db";
     
     /**
-     * Changed by: Achini De Zoysa
-     * Changes: DATABASE_VERSION = 4 to update the table with new columns
+     * Changed by: Achini De Zoysa & Hantao Zhao
+     * Changes: DATABASE_VERSION = 5 to update the table with new columns
      */
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 6;
     private static final String TABLE_NAME = "shopping_list";
 
     private static HashMap<String, String> sProjectionMap;
@@ -74,6 +74,8 @@ public class TrollyProvider extends ContentProvider {
         /**
          * Changed by: Achini De Zoysa
          * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
+         * Changed by: Hantao Zhao
+         * Changes: Added new columns LISTNAME
          */
         @Override
         public void onCreate(SQLiteDatabase db) {
@@ -86,6 +88,7 @@ public class TrollyProvider extends ContentProvider {
                     + ShoppingList.PRIORITY + " INTEGER,"
                     + ShoppingList.TOTALPRICE + " INTEGER,"
                     + ShoppingList.STATUS + " INTEGER,"
+                    + ShoppingList.LISTNAME + " TEXT,"
                     + ShoppingList.CREATED_DATE + " INTEGER,"
                     + ShoppingList.MODIFIED_DATE + " INTEGER"
                     + ");");
@@ -276,6 +279,8 @@ public class TrollyProvider extends ContentProvider {
         /**
          * Changed by: Achini De Zoysa
          * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
+         * Changed by: Hantao Zhao
+         * Changes: Added new columns LISTNAME
          */
         
         sProjectionMap = new HashMap<String, String>();
@@ -286,6 +291,7 @@ public class TrollyProvider extends ContentProvider {
         sProjectionMap.put(ShoppingList.PRICE, ShoppingList.PRICE);
         sProjectionMap.put(ShoppingList.TOTALPRICE, ShoppingList.TOTALPRICE);
         sProjectionMap.put(ShoppingList.PRIORITY, ShoppingList.PRIORITY);
+        sProjectionMap.put(ShoppingList.LISTNAME, ShoppingList.LISTNAME);
         sProjectionMap.put(ShoppingList.STATUS, ShoppingList.STATUS);
         sProjectionMap.put(ShoppingList.CREATED_DATE, ShoppingList.CREATED_DATE);
         sProjectionMap.put(ShoppingList.MODIFIED_DATE, ShoppingList.MODIFIED_DATE);

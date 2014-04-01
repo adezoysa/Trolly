@@ -37,7 +37,7 @@ public final class Trolly {
          */
         public static final Uri CONTENT_URI
                 = Uri.parse("content://caldwell.ben.provider.Trolly/shoppinglist");
-
+      
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of items.
          */
@@ -129,5 +129,12 @@ public final class Trolly {
          * <P>Type: INTEGER (long)</P>
          */
         public static final String MODIFIED_DATE = "modified";
+        /**
+         * Added by: Hantao Zhao
+         * The listname for multiple list
+         * <P>Type: TEXT</P>
+         */
+        public static final String LISTNAME = "listname";
+
     }
 }
