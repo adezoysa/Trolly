@@ -21,9 +21,8 @@
     <string name="key_sort_shop">shop mode sort order</string>
     
     <!-- Added By: Achini De Zoysa 
-    Changes: All the new Item categories: Images(s), Priority, Price, Units, Quantity -->
-    
-    <string name="image">Image(s)</string>
+    Changes: All the new Item categories: Images(s), Priority, Price, Units, Quantity -->   
+    <string name="image">Image</string>
     <string name="priority">Priority</string>
     <string name="price">Price (per quantity)</string>
     <string name="units">Units</string>
@@ -32,8 +31,7 @@
     <string name="menu_item_stores">Stores...</string>
     
     <!-- Added By: Hantao Zhao
-    Changes: ListItem, Shooping -->
-    
+    Changes: ListItem, Shooping -->    
     <string name="lists">Lists</string>
     <string name="shopping">Shopping</string>
     
@@ -43,5 +41,11 @@
     <string name="clear_prompt">Remove all items from the list?</string>
     <string name="reset_list">Reset List</string>
     <string name="reset_prompt">Permanently delete all items from the list?</string>
+    
+    <!-- Added By: Menaka Kiriwattuduwa
+    Changes: Camera popup menu -->    
+    <string name="take_new_pic">Take new picture</string>
+    <string name="use_existing_pic">Use existing picture</string>
+    <string name="delete_pic">Remove picture</string>
     
 </resources>

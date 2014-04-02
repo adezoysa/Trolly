@@ -19,45 +19,48 @@
 
 package caldwell.ben.trolly;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
-import caldwell.ben.trolly.R;
-
-import caldwell.ben.provider.Trolly.ShoppingList;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
-import android.widget.Filterable;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
+import caldwell.ben.provider.Trolly.ShoppingList;
 
 public class Trolly extends ListActivity {
 	
@@ -70,241 +73,11 @@ public class Trolly extends ListActivity {
      */
 	public static boolean listMode = false;
 	
-	/**
-	 * TrollyAdapter allows crossing items off the list and filtering
-	 * on user text input.
-	 * @author Ben
-	 *
-	 */
-	
 	/* Added by: Hantao Zhao
      * currentList
      */
 	public String currentList = "Default List";
 	
-	
-	private static class TrollyAdapter extends SimpleCursorAdapter implements Filterable {
-
-		private ContentResolver mContent;   
-		
-		public TrollyAdapter(Context context, int layout, Cursor c,
-				String[] from, int[] to) {
-			super(context, layout, c, from, to);
-			mContent = context.getContentResolver();
-		}
-		
-		@Override
-        public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-            if (getFilterQueryProvider() != null) {
-                return getFilterQueryProvider().runQuery(constraint);
-            }
-
-            StringBuilder buffer = null;
-            String[] args = null;
-            if (constraint != null) {
-                buffer = new StringBuilder();
-                buffer.append("UPPER(");
-                buffer.append(ShoppingList.ITEM);
-                
-                buffer.append(") GLOB ?");
-                args = new String[] { "*" + constraint.toString().toUpperCase() + "*" };
-            }
-
-            return mContent.query(ShoppingList.CONTENT_URI, PROJECTION,
-                    buffer == null ? null : buffer.toString(), args,
-                    null);
-        }
-
-		@Override
-		public void bindView(View view, Context context, Cursor cursor) {
-			TextView item = (TextView)view.findViewById(R.id.item);
-			item.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.ITEM)));
-		
-			TextView quantity = (TextView)view.findViewById(R.id.quantity);
-			quantity.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.QUANTITY)));
-			
-			TextView units = (TextView)view.findViewById(R.id.units);
-			units.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.UNITS)));
-			
-			TextView price = (TextView)view.findViewById(R.id.price);
-			price.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.TOTALPRICE)));
-			
-			TextView priority = (TextView)view.findViewById(R.id.priority);
-			priority.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.PRIORITY)));
-			
-			switch(cursor.getInt(cursor.getColumnIndex(ShoppingList.STATUS))){
-			case ShoppingList.OFF_LIST:
-				item.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				quantity.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				units.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				price.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				priority.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				
-				item.setTextColor(Color.DKGRAY);
-				quantity.setTextColor(Color.DKGRAY);
-				units.setTextColor(Color.DKGRAY);
-				price.setTextColor(Color.DKGRAY);
-				priority.setTextColor(Color.DKGRAY);
-				break;
-			case ShoppingList.ON_LIST:
-				item.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				quantity.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				units.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				price.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				priority.setPaintFlags(item.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-				
-				item.setTextColor(Color.GREEN);
-				quantity.setTextColor(Color.WHITE);
-				units.setTextColor(Color.WHITE);
-				price.setTextColor(Color.WHITE);
-				priority.setTextColor(Color.GREEN);
-				break;
-			case ShoppingList.IN_TROLLEY:
-				item.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-				quantity.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-				units.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-				price.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-				priority.setPaintFlags(item.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-				
-				item.setTextColor(Color.GRAY);
-				quantity.setTextColor(Color.GRAY);
-				units.setTextColor(Color.GRAY);
-				price.setTextColor(Color.GRAY);
-				priority.setTextColor(Color.GRAY);
-				break;
-			}
-		}
-
-		@Override
-		public CharSequence convertToString(Cursor cursor) {
-			return cursor.getString(cursor.getColumnIndex(ShoppingList.ITEM));
-		}
-		
-	}
-	
-	/**
-	 * Added By: Hantao Zhao
-	 * Class: TrollyAdapterForList
-	 * Functionality: New Adapter for list performance
-	 */
-	
-	private static class TrollyAdapterForList extends SimpleCursorAdapter
-	implements Filterable {
-
-		private ContentResolver mContent;
-		
-		ArrayList<String> listsarray = new ArrayList<String>();
-		
-		public TrollyAdapterForList(Context context, int layout, Cursor c,
-				String[] from, int[] to) {
-			super(context, layout, c, from, to);
-			mContent = context.getContentResolver();
-		}
-		
-		@Override
-		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-			if (getFilterQueryProvider() != null) {
-				return getFilterQueryProvider().runQuery(constraint);
-			}
-		
-			StringBuilder buffer = null;
-			String[] args = null;
-			if (constraint != null) {
-				buffer = new StringBuilder();
-				buffer.append("UPPER(");
-				buffer.append(ShoppingList.LISTNAME);
-				buffer.append(") GLOB ?");
-				args = new String[] { "*" + constraint.toString().toUpperCase()
-						+ "*" };
-			}
-		
-			return mContent.query(ShoppingList.CONTENT_URI, LISTPROJECTION,
-					buffer == null ? null : buffer.toString(), args, null);
-		}
-		
-		@Override
-		// bindView
-		public void bindView(View view, Context context, Cursor cursor) {
-			TextView item = (TextView) view.findViewById(R.id.item);
-			String toAdd = cursor.getString(cursor
-					.getColumnIndex(ShoppingList.LISTNAME));
-		
-			if (!listsarray.contains(toAdd)) {
-				listsarray.add(toAdd);
-				item.setText(toAdd);
-			}
-		}
-		
-		@Override
-		public CharSequence convertToString(Cursor cursor) {
-			String toAdd = cursor.getString(cursor
-					.getColumnIndex(ShoppingList.LISTNAME));
-			if (!listsarray.contains(toAdd)) {
-				return toAdd;
-			} else
-				return null;
-		}
-
-}
-	
-	
-	
-	
-	/**
-	 * AutoFillAdapter is an adapter for the AutoCompleteTextView at the top of the Trolly Activity
-	 * @author Ben Caldwel
-	 *
-	 */
-	private static class AutoFillAdapter extends CursorAdapter implements Filterable {
-
-		private ContentResolver mContent;
-		
-		public AutoFillAdapter(Context context, Cursor c) {
-			super(context, c);
-			mContent = context.getContentResolver();
-		}
-
-		@Override
-		public void bindView(View view, Context context, Cursor cursor) {
-			((TextView) view).setText(cursor.getString(cursor.getColumnIndex(ShoppingList.ITEM)));
-		}
-
-		@Override
-		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			final LayoutInflater inflater = LayoutInflater.from(context);
-			final TextView view = (TextView)inflater.inflate(
-												android.R.layout.simple_dropdown_item_1line, 
-												parent,false);
-			view.setText(cursor.getString(cursor.getColumnIndex(ShoppingList.ITEM)));
-			return view;
-		}
-
-		@Override
-		public CharSequence convertToString(Cursor cursor) {
-			return cursor.getString(cursor.getColumnIndex(ShoppingList.ITEM)); 
-		}
-
-		@Override
-		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-			if (getFilterQueryProvider() != null) {
-                return getFilterQueryProvider().runQuery(constraint);
-            }
-
-            StringBuilder buffer = null;
-            String[] args = null;
-            if (constraint != null) {
-                buffer = new StringBuilder();
-                buffer.append("UPPER(");
-                buffer.append(ShoppingList.ITEM);
-                buffer.append(") GLOB ?");
-                args = new String[] { "*" + constraint.toString().toUpperCase() + "*" };
-            }
-
-            return mContent.query(ShoppingList.CONTENT_URI, PROJECTION,
-                    buffer == null ? null : buffer.toString(), args,
-                    null);
-		}
-	}
 	/**
      * The columns we are interested in from the database
      */
@@ -317,6 +90,7 @@ public class Trolly extends ListActivity {
         ShoppingList.QUANTITY,//NEW
         ShoppingList.UNITS,//NEW
         ShoppingList.PRICE,//NEW
+        ShoppingList.IMAGE_FILE_PATH,//NEW (Added by Menaka Kiriwattuduwa
         ShoppingList.TOTALPRICE,//NEW
         ShoppingList.PRIORITY,//NEW
         /* Added by: Hantao Zhao
@@ -371,11 +145,22 @@ public class Trolly extends ListActivity {
 	private EditText mDialogEditPRIORITY;
 	private TextView mDialogText;
 	private View mDialogView;
+	
+	/**Added By: Menaka Kiriwattuduwa
+	 * mDialog for camera features, acceleration/shake detection
+	**/
+	private ImageButton mDialogButtonIMAGE;
+	private ImageView mDialogThumbnail;
+
+	static final int REQUEST_IMAGE_CAPTURE = 1;
+	static final int REQUEST_LOAD_IMAGE = 2;
+	private String mPhotoFilePath = null;
 
 	private Cursor mCursor;
 	private AutoCompleteTextView mTextBox;
 	private Button btnAdd;
 	private TrollyAdapter mAdapter;
+	
 	/* Added by: Hantao Zhao
      * Adapter for the list
      */
@@ -401,8 +186,8 @@ public class Trolly extends ListActivity {
         // Inform the list we provide context menus for items
         getListView().setOnCreateContextMenuListener(this);
                
-	adding = false;
-	updateList();
+		adding = false;
+		updateList();
               
         mTextBox = (AutoCompleteTextView)findViewById(R.id.textbox);
         btnAdd = (Button)findViewById(R.id.btn_add);
@@ -486,12 +271,9 @@ public class Trolly extends ListActivity {
 					updateListView();
 				}
 				mTextBox.setText("");
-
 			}
 		}
-
         });
-        //mPrefs = getSharedPreferences(null, MODE_PRIVATE);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         
         if (intent.hasExtra("org.openintents.intents.ShoppingListIntents.EXTRA_STRING_ARRAYLIST_SHOPPING"))
@@ -516,7 +298,8 @@ public class Trolly extends ListActivity {
      * Changed by: Achini De Zoysa
      * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
      */
-		new String[] { ShoppingList.ITEM,ShoppingList.QUANTITY,ShoppingList.UNITS,ShoppingList.TOTALPRICE,ShoppingList.PRIORITY}, new int[] { R.id.item, R.id.quantity,R.id.units, R.id.price, R.id.priority});
+		new String[] { ShoppingList.ITEM,ShoppingList.QUANTITY,ShoppingList.UNITS,ShoppingList.IMAGE_FILE_PATH,ShoppingList.TOTALPRICE,ShoppingList.PRIORITY}, new int[] 
+				{ R.id.item, R.id.quantity,R.id.units, R.string.image, R.id.price, R.id.priority}, PROJECTION);
 		setListAdapter(mAdapter);
 	}
 
@@ -533,7 +316,7 @@ public class Trolly extends ListActivity {
 				null,
 				ShoppingList.DEFAULT_SORT_ORDER);
 		
-		AutoFillAdapter autoFillAdapter = new AutoFillAdapter(this, cAutoFill);
+		AutoFillAdapter autoFillAdapter = new AutoFillAdapter(this, cAutoFill, PROJECTION);
 		mTextBox.setAdapter(autoFillAdapter);
 	}
 
@@ -650,6 +433,14 @@ public class Trolly extends ListActivity {
 	        	mDialogEditUNITS.setText(c.getString(c.getColumnIndex(ShoppingList.UNITS)));
 	        	mDialogEditPRICE.setText(c.getString(c.getColumnIndex(ShoppingList.PRICE)));
 	        	mDialogEditPRIORITY.setText(c.getString(c.getColumnIndex(ShoppingList.PRIORITY)));
+	        	
+	        	/**
+	             * Changed by: Menaka Kiriwattuduwa
+	             * Changes: Update photo file path
+	             */
+	        	mPhotoFilePath = c.getString(c.getColumnIndex(ShoppingList.IMAGE_FILE_PATH));
+	        	createThumbnail();	        	
+	        	
 	        	return true;
 	        case MENU_ITEM_DELETE:
 	        	//Show are you sure dialog then delete
@@ -837,10 +628,10 @@ public class Trolly extends ListActivity {
             mDialogEditPRICE = (EditText)mDialogView.findViewById(R.id.editprice);
             mDialogEditUNITS = (EditText)mDialogView.findViewById(R.id.editunits);
             mDialogEditPRIORITY = (EditText)mDialogView.findViewById(R.id.editpriority);
-            return new AlertDialog.Builder(this)
-                .setTitle(R.string.edit_item)
-                .setView(mDialogView)
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.edit_item)
+                .setView(mDialogView);
+            builder.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                 	
                 	public void onClick(DialogInterface dialog, int whichButton) {
                     	/* User clicked OK so do some stuff */
@@ -877,8 +668,6 @@ public class Trolly extends ListActivity {
                 			} catch (NumberFormatException e) {
                 				// do nothing
                 			}
-                    		
-                			
                 		}
                 		if (units != null) {
                 			values.put(ShoppingList.UNITS, units);
@@ -889,16 +678,74 @@ public class Trolly extends ListActivity {
                 		if (priority != null) {
                 			values.put(ShoppingList.PRIORITY, priority);
                 		}
+                		
+                		/**
+                         * Camera additions
+                         * Added by: Menaka Kiriwattuduwa */
+                		if (mPhotoFilePath != null) {
+                			values.put(ShoppingList.IMAGE_FILE_PATH, mPhotoFilePath);
+                			mPhotoFilePath = null;
+                		}
                        
                 	getContentResolver().update(mUri, values, null, null);
                 	}
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+                });
+                builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         /* User clicked cancel so do some stuff */
+                    	mPhotoFilePath = null;
                     }
-                })
-                .create();
+                });
+                
+                /**
+                 * Camera additions
+                 * Added by: Menaka Kiriwattuduwa
+                 * Functionality: Initializes button and thumbnail (ImageView) to be used with
+                 * camera. Once the camera button is clicked, the camera application is opened
+                 * for the use to take a photograph.
+                 */
+                // Set up thumbnail
+                mDialogThumbnail = (ImageView)mDialogView.findViewById(R.id.thumbnail);
+        		createThumbnail();
+        		
+        		// Set up camera button behaviour
+                mDialogButtonIMAGE = (ImageButton)mDialogView.findViewById(R.id.attachimage);
+        		if (mDialogButtonIMAGE != null){
+        			 mDialogButtonIMAGE.setOnClickListener(new OnClickListener() {
+        			 @Override  
+        	         public void onClick(View v) {  
+        	            // Creates an instance of PopupMenu  
+        	            PopupMenu camera_menu = new PopupMenu(Trolly.this, mDialogButtonIMAGE);   
+        	            camera_menu.getMenuInflater().inflate(R.menu.camera_menu, camera_menu.getMenu());  
+
+        	            // Registers popup with OnMenuItemClickListener  
+        	            camera_menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {  
+        	            	 // Set up behaviour of popup menu items
+        		             public boolean onMenuItemClick(MenuItem item) {  
+        		            	 switch (item.getItemId()) {
+        		            	 case R.id.take_new_pic :
+        		            		// Invoke an intent to capture a photo
+        		     		    	dispatchTakePictureIntent();
+        		     		    	break;
+        		            	 case R.id.existing_pic :
+        		            		// Invoke an intent to load existing picture from gallery
+        		            		dispatchUseExistingPicIntent();
+        		            		break;	 
+        		            	 case R.id.delete_pic :
+        		            		mPhotoFilePath = null;
+        		            		createThumbnail();
+         		            		break;
+        		            	 }	                
+        		              return true;  	            	 
+        		             }  
+        	            });  
+        	            camera_menu.show(); 
+        	           }  
+        		  });
+        		}
+        		/* End of camera additions */
+                
+                return builder.create();
 		case DIALOG_DELETE:
             mDialogView = factory.inflate(R.layout.dialog_confirm, null);
             mDialogText = (TextView)mDialogView.findViewById(R.id.dialog_confirm_prompt);
@@ -1120,7 +967,7 @@ public class Trolly extends ListActivity {
     	}
     }
     /*
-     * Added By: Hanto Zhao
+     * Added By: Hantao Zhao
 	 * Funcion to update the list views in the list mode interface
 	 */
 	public void updateListView() {
@@ -1131,11 +978,157 @@ public class Trolly extends ListActivity {
 		// set the list adapter
 		this.mAdapterForList = new TrollyAdapterForList(this,
 				R.layout.shoppinglist_item, mCursor,
-				new String[] { ShoppingList.LISTNAME }, new int[] { R.id.item });
+				new String[] { ShoppingList.LISTNAME }, new int[] { R.id.item }, LISTPROJECTION);
 		setListAdapter(mAdapterForList);
 	}
+
+	
+	
+	/**
+	* Added by: Menaka Kiriwattuduwa
+	* Class/Funct name: onActivityResult
+	* Inputs: requestCode:Integer, resultCode:Integer, data:Intent
+	* Outputs: None
+	* Functionality: Handle results of various activities.
+	* 	In this case the function handles the results of taking a new picture
+	*  or adding an existing picture from the gallery.
+	*/
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	   // Results of taking new picture
+		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+	   	// Add to main gallery so image is available to other apps
+	   	galleryAddPic();
+	   	
+	   	// Create thumbnail for image preview
+	   	createThumbnail();  
+	   }
+	   
+		// Results of adding an existing picture from gallery
+	   if (requestCode == REQUEST_LOAD_IMAGE && resultCode == RESULT_OK && null != data) {
+	       Uri selectedImage = data.getData();
+	       String[] filePathColumn = { MediaStore.Images.Media.DATA };
+	
+	       Cursor cursor = getContentResolver().query(selectedImage,
+	               filePathColumn, null, null, null);
+	       cursor.moveToFirst();
+	
+	       int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+	       String picturePath = cursor.getString(columnIndex);
+	       cursor.close();
+	        
+	       mPhotoFilePath = picturePath;
+	       // Create thumbnail for image preview
+	       createThumbnail();         
+	   }
+	}
+	
+	/**
+	 * Added by: Menaka Kiriwattuduwa
+	 * Class/Funct name: createThumbnail
+	 * Inputs: None
+	 * Outputs: None
+	 * Functionality: Create thumbnail of image and sets visibility.
+	 */
+	private void createThumbnail() {
+		if (mPhotoFilePath != null){
+			Bitmap myBitmap = BitmapFactory.decodeFile(mPhotoFilePath);
+			mDialogThumbnail.setImageBitmap(myBitmap);
+		} else {
+			mDialogThumbnail.setImageResource(R.drawable.blank_thumbnail);
+		}
+	}
+	
+	/**
+     * Added by: Menaka Kiriwattuduwa
+     * Class/Funct name: dispatchTakePictureIntent
+     * Inputs: None
+     * Outputs: None
+     * Functionality: Invokes an intent to capture a photo.
+     * 	This function is called when the "Take new picture" 
+     *  option from the camera popup menu is selected. It creates a file path for the
+     * 	new image to be stored. If this location is created correctly, the camera window is opened, 
+     * 	allowing the user to take a photo.
+     */
+	private void dispatchTakePictureIntent() {
+	    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	    // Ensure that there's a camera activity to handle the intent
+	    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+	        // Create the File where the photo should go
+	    	File photoFile = null;
+	        try {
+	        	// create location to save image file
+	        	photoFile = createImageFile();
+	        } catch (IOException ex) {
+	        	// reset file variable
+	        	photoFile = null;
+	        	Toast.makeText(getApplicationContext(),"Unable to create image.", Toast.LENGTH_SHORT).show();
+	        	return;
+	        }
+	        // Continue only if the File was successfully created
+	        if (photoFile != null) {
+	        	mPhotoFilePath = photoFile.getAbsolutePath();
+	            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+	                    Uri.fromFile(photoFile));
+	            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+	        }
+	    }
+	}
+	
+	/**
+     * Added by: Menaka Kiriwattuduwa
+     * Class/Funct name: dispatchUseExistingPicIntent
+     * Inputs: None
+     * Outputs: None
+     * Functionality: Invokes an intent to open Android gallery to add an 
+     *  existing picture to an item. This function is called when the "Use existing picture" 
+     *  option from the camera popup menu is selected. Users are able to access the Android gallery
+     *  and choose from the existing images.
+     */
+	private void dispatchUseExistingPicIntent() {
+		Intent i = new Intent(
+				Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);			 
+		startActivityForResult(i, REQUEST_LOAD_IMAGE);
+	}
+	
+	/**
+     * Added by: Menaka Kiriwattuduwa
+     * Class/Funct name: createImageFile
+     * Inputs: None
+     * Outputs: image:File
+     * Functionality: Creates unique file name and path for a photo to be saved in.
+     * 	If the function is unable to create the file name, an exception is thrown.
+     */
+	private File createImageFile() throws IOException {
+	    // Create an image file name
+	    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	    String imageFileName = "Trolly_" + timeStamp + "_";
+	    File storageDir = Environment.getExternalStoragePublicDirectory(
+	            Environment.DIRECTORY_PICTURES);
+	    File image = File.createTempFile(
+	        imageFileName,  /* prefix */
+	        ".jpg",         /* suffix */
+	        storageDir      /* directory */
+	    );
+	    return image;
+	}
+	
+
+	/**
+     * Added by: Menaka Kiriwattuduwa
+     * Class/Funct name: galleryAddPic
+     * Inputs: None
+     * Outputs: None
+     * Functionality: Adds photo to Media Provider database where it can be accessed
+     * 	in the Android Gallery and other apps.
+     */
+	private void galleryAddPic() {
+	    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+	    File f = new File("file:" + mPhotoFilePath);
+	    Uri contentUri = Uri.fromFile(f);
+	    mediaScanIntent.setData(contentUri);
+	    this.sendBroadcast(mediaScanIntent);
+	}
+	
+	
 }
-
-
-
-

@@ -120,7 +120,7 @@ Edits: Updated the layout to include sub item categories: Quantity, Priority, Pr
 			      android:layout_height="80dp"
 			      android:scaleType="centerInside"
 			      android:src="@drawable/attach_image" 
-			      android:background="@null" />
+			      android:background="@android:color/transparent" />
  
 		</RelativeLayout>
 		
