@@ -1,0 +1,19 @@
+<!-- 
+Added by: Menaka Kiriwattuduwa
+Functionality: Custom dropdown for adding pictures.
+ -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">  
+
+    <item  
+        android:id="@+id/take_new_pic" 
+        android:title="@string/take_new_pic"/>  
+
+    <item  
+        android:id="@+id/existing_pic"  
+        android:title="@string/use_existing_pic"/>    
+        
+    <item  
+        android:id="@+id/delete_pic"  
+        android:title="@string/delete_pic"/>    
+
+</menu>

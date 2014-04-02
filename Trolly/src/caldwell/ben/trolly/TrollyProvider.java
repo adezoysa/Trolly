@@ -16,10 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * This file was modified by Achini De Zoysa, Hantao Zhao and Menaka Kiriwattuduwa.
+ * Please see the in-code comments for further information.
+ */
+
 package caldwell.ben.trolly;
 
-import caldwell.ben.provider.Trolly;
-import caldwell.ben.provider.Trolly.ShoppingList;
+import java.util.HashMap;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -35,8 +39,8 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
-
-import java.util.HashMap;
+import caldwell.ben.provider.Trolly;
+import caldwell.ben.provider.Trolly.ShoppingList;
 
 /**
  * Provides access to a database of notes. Each note has a title, the note
@@ -76,6 +80,8 @@ public class TrollyProvider extends ContentProvider {
          * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
          * Changed by: Hantao Zhao
          * Changes: Added new columns LISTNAME
+         * Changed by: Menaka Kiriwattuduwa
+         * Changes: Added new columns IMAGE_FILE_PATH
          */
         @Override
         public void onCreate(SQLiteDatabase db) {
@@ -86,6 +92,7 @@ public class TrollyProvider extends ContentProvider {
                     + ShoppingList.UNITS + " TEXT,"
                     + ShoppingList.PRICE + " INTEGER,"
                     + ShoppingList.PRIORITY + " INTEGER,"
+                    + ShoppingList.IMAGE_FILE_PATH + " TEXT,"
                     + ShoppingList.TOTALPRICE + " INTEGER,"
                     + ShoppingList.STATUS + " INTEGER,"
                     + ShoppingList.LISTNAME + " TEXT,"
@@ -281,6 +288,8 @@ public class TrollyProvider extends ContentProvider {
          * Changes: Added new columns QUANTITY, UNITS, PRICE, PRIORITY, TOTALPRICE
          * Changed by: Hantao Zhao
          * Changes: Added new columns LISTNAME
+         * Changed by: Menaka Kiriwattuduwa
+         * Changes: Added new columns IMAGE_FILE_PATH
          */
         
         sProjectionMap = new HashMap<String, String>();
@@ -289,6 +298,7 @@ public class TrollyProvider extends ContentProvider {
         sProjectionMap.put(ShoppingList.QUANTITY, ShoppingList.QUANTITY);
         sProjectionMap.put(ShoppingList.UNITS, ShoppingList.UNITS);
         sProjectionMap.put(ShoppingList.PRICE, ShoppingList.PRICE);
+        sProjectionMap.put(ShoppingList.IMAGE_FILE_PATH, ShoppingList.IMAGE_FILE_PATH);
         sProjectionMap.put(ShoppingList.TOTALPRICE, ShoppingList.TOTALPRICE);
         sProjectionMap.put(ShoppingList.PRIORITY, ShoppingList.PRIORITY);
         sProjectionMap.put(ShoppingList.LISTNAME, ShoppingList.LISTNAME);

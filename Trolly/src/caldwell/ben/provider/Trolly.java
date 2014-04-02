@@ -16,6 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * This file was modified by Achini De Zoysa, Hantao Zhao and Menaka Kiriwattuduwa.
+ * Please see the in-code comments for further information.
+ */
+ 
+
 package caldwell.ben.provider;
 
 import android.net.Uri;
@@ -135,6 +141,13 @@ public final class Trolly {
          * <P>Type: TEXT</P>
          */
         public static final String LISTNAME = "listname";
+        
+        /**
+         * Added by: Menaka Kiriwattuduwa
+         * The item IMAGE_FILE_PATH
+         * <P>Type: TEXT</P>
+         */
+        public static final String IMAGE_FILE_PATH = "imagefilepath";
 
     }
 }
